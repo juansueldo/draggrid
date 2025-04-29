@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DragGrid Demo</title>
+  <link rel="shortcut icon" href="/img/logo.png" type="image/x-icon">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+      background-color: #211f1f;
+    }
+    .header {
+      background-color: white;
+      color: #211f1f;
+      padding: 15px 20px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .draggrid-logo{
+      color: #1a1a22 !important;
+    }
+    .d-flex{
+      display: flex;
+      align-items: center;
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+    .controls {
+      margin-bottom: 20px;
+      padding: 15px;
+      background-color: #292930;
+      color: #ccc;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .control-group {
+      margin-bottom: 10px;
+    }
+    .button-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    button {
+      padding: 8px 12px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    button.secondary {
+      background-color: #2196F3;
+    }
+    button.secondary:hover {
+      background-color: #0b7dda;
+    }
+    button.danger {
+      background-color: #f44336;
+    }
+    button.danger:hover {
+      background-color: #d32f2f;
+    }
+    .grid-container {
+      width: 100%;
+      min-height: 600px;
+      border: 1px solid #242222;
+      background-color: #fafafa;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s, visibility 0.3s;
+    }
+    .modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+    .modal-content {
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      width: 100%;
+      max-width: 500px;
+      transform: translateY(-20px);
+      transition: transform 0.3s;
+    }
+    .modal-overlay.active .modal-content {
+      transform: translateY(0);
+    }
+    .modal-header {
+      padding: 15px 20px;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-header h3 {
+      margin: 0;
+      font-size: 18px;
+    }
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 20px;
+      color: #777;
+      cursor: pointer;
+      padding: 0;
+    }
+    .modal-body {
+      padding: 20px;
+    }
+    .modal-footer {
+      padding: 15px 20px;
+      border-top: 1px solid #eee;
+      text-align: right;
+    }
+    /* Fin de estilos del modal */
+    
+    .form-group {
+      margin-bottom: 15px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 8px;
+      box-sizing: border-box;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    .notifications {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1000;
+    }
+    .notification {
+      padding: 12px 20px;
+      margin-bottom: 10px;
+      border-radius: 4px;
+      color: white;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.16);
+      animation: fadeIn 0.3s, fadeOut 0.5s 3s forwards;
+    }
+    .notification.success {
+      background-color: #4CAF50;
+    }
+    .notification.error {
+      background-color: #f44336;
+    }
+    .notification.info {
+      background-color: #2196F3;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; }
+    }
+    /* Estilos adicionales para la cuadrícula */
+    .drag-grid-item {
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .widget-content {
+      padding: 10px;
+      height: calc(100% - 38px); /* Ajustar por la altura del header */
+      overflow: auto;
+    }
+    .status-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 8px 20px;
+      background-color: #f5f5f5;
+      border-top: 1px solid #ddd;
+      font-size: 14px;
+      color: #666;
+      display: flex;
+      justify-content: space-between;
+    }
+    .toggle-switch {
+      display: inline-flex;
+      align-items: center;
+      margin-right: 15px;
+    }
+    .toggle-switch label {
+      margin-right: 5px;
+    }
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 40px;
+      height: 24px;
+    }
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: .4s;
+      border-radius: 34px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+    input:checked + .slider {
+      background-color: #4CAF50;
+    }
+    input:checked + .slider:before {
+      transform: translateX(16px);
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="d-flex">
+      <img src="/img/logo.png" width="40" height="40" alt="DragGrid logo">
+      <h1 class="draggrid-logo">DragGrid</h1>
+    </div>
+    <div id="last-saved">Última actualización: Nunca</div>
+  </div>
+  
+  <div class="controls">
+    <div class="control-group">
+      <h3>Controles</h3>
+      <div class="button-group">
+        <button id="add-widget">Agregar Widget</button>
+        <button id="clear-grid" class="danger">Limpiar Cuadrícula</button>
+        <button id="save-grid" class="secondary">Guardar Estado</button>
+        <button id="load-grid" class="secondary">Cargar Estado</button>
+      </div>
+    </div>
+    
+    <div class="control-group">
+      <div class="toggle-switch">
+        <label for="drag-toggle">Arrastrar:</label>
+        <label class="switch">
+          <input type="checkbox" id="drag-toggle" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+      
+      <div class="toggle-switch">
+        <label for="resize-toggle">Redimensionar:</label>
+        <label class="switch">
+          <input type="checkbox" id="resize-toggle" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+      
+      <div class="toggle-switch">
+        <label for="remove-toggle">Eliminar:</label>
+        <label class="switch">
+          <input type="checkbox" id="remove-toggle" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="toggle-switch">
+        <label for="swappable-toggle">Intercambiar:</label>
+        <label class="switch">
+          <input type="checkbox" id="swappable-toggle" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+      
+      
+      <div class="toggle-switch">
+        <label for="autosave-toggle">Auto guardar:</label>
+        <label class="switch">
+          <input type="checkbox" id="autosave-toggle">
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Reemplazar el formulario actual con un modal -->
+  <div id="widget-modal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Configuración del Widget</h3>
+        <button class="modal-close" id="close-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="widget-x">Posición X:</label>
+          <input type="number" id="widget-x" min="0" max="11" value="0">
+        </div>
+        <div class="form-group">
+          <label for="widget-y">Posición Y:</label>
+          <input type="number" id="widget-y" min="0" value="0">
+        </div>
+        <div class="form-group">
+          <label for="widget-width">Ancho:</label>
+          <input type="number" id="widget-width" min="1" max="12" value="3">
+        </div>
+        <div class="form-group">
+          <label for="widget-height">Alto:</label>
+          <input type="number" id="widget-height" min="1" max="10" value="2">
+        </div>
+        <div class="form-group">
+          <label for="widget-title">Título:</label>
+          <input type="text" id="widget-title" value="Nuevo Widget">
+        </div>
+        <div class="form-group">
+          <label for="widget-content">Contenido:</label>
+          <textarea id="widget-content" rows="4">Este es el contenido del widget.</textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="cancel-widget" class="secondary">Cancelar</button>
+        <button id="create-widget">Crear</button>
+      </div>
+    </div>
+  </div>
+  
+  <div id="grid" class="grid-container"></div>
+  
+  <div class="status-bar">
+    <div id="grid-status">Widgets: 0</div>
+    <div>© 2025 DragGrid - By Juan Sueldo</div>
+    <div id="save-status"></div>
+  </div>
+  
+  <div id="notifications" class="notifications"></div>
+
+  <!-- Incluir primero la biblioteca DragGrid -->
+  <script src="/js/draggrid.js"></script>
+
+  <script>
+    // Configuración de la API (simulación)
+    const API_CONFIG = {
+      saveUrl: '/api/save-grid', // URL simulada para guardar datos
+      loadUrl: '/api/load-grid'  // URL simulada para cargar datos
+    };
+    
+    // Función para mostrar notificaciones
+    function showNotification(message, type = 'info') {
+      const notifications = document.getElementById('notifications');
+      const notification = document.createElement('div');
+      notification.className = `notification ${type}`;
+      notification.textContent = message;
+      notifications.appendChild(notification);
+      
+      // Eliminar después de 4 segundos
+      setTimeout(() => {
+        notification.remove();
+      }, 4000);
+    }
+    
+    // Función para actualizar la información de estado
+    function updateStatus() {
+      const gridStatus = document.getElementById('grid-status');
+      gridStatus.textContent = `Widgets: ${grid.items.length}`;
+    }
+    
+    // Actualizar timestamp de guardado
+    function updateSavedTime() {
+      const lastSaved = document.getElementById('last-saved');
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString();
+      lastSaved.textContent = `Última actualización: ${timeStr}`;
+    }
+    
+    // Simular operaciones de API
+    const apiService = {
+      // Simular guardar en el servidor
+      saveGrid: function(data) {
+        return new Promise((resolve, reject) => {
+          // Simular una demora de red
+          setTimeout(() => {
+            // Guardar en localStorage como simulación
+            try {
+              localStorage.setItem('DragGridData', JSON.stringify(data));
+              resolve({ success: true, message: 'Datos guardados correctamente' });
+            } catch (error) {
+              reject({ success: false, message: 'Error al guardar datos' });
+            }
+          }, 800);
+        });
+      },
+      
+      // Simular cargar desde el servidor
+      loadGrid: function() {
+        return new Promise((resolve, reject) => {
+          // Simular una demora de red
+          setTimeout(() => {
+            try {
+              const data = localStorage.getItem('DragGridData');
+              if (data) {
+                resolve({ success: true, data: JSON.parse(data) });
+              } else {
+                resolve({ success: true, data: [] });
+              }
+            } catch (error) {
+              reject({ success: false, message: 'Error al cargar datos' });
+            }
+          }, 800);
+        });
+      }
+    };
+
+    // Inicializar la cuadrícula
+    const grid = new DragGrid('#grid', {
+      columns: 12,
+      rowHeight: 60,
+      margin: 5,
+      draggable: true,
+      resizable: true,
+      removable: true,
+      animate: true,
+      swappable: true
+    });
+
+    // Elementos DOM
+    const addWidgetBtn = document.getElementById('add-widget');
+    const clearGridBtn = document.getElementById('clear-grid');
+    const saveGridBtn = document.getElementById('save-grid');
+    const loadGridBtn = document.getElementById('load-grid');
+    const modal = document.getElementById('widget-modal');
+    const createWidgetBtn = document.getElementById('create-widget');
+    const cancelWidgetBtn = document.getElementById('cancel-widget');
+    const closeModalBtn = document.getElementById('close-modal');
+    const dragToggle = document.getElementById('drag-toggle');
+    const resizeToggle = document.getElementById('resize-toggle');
+    const removeToggle = document.getElementById('remove-toggle');
+    const swappableToggle = document.getElementById('swappable-toggle');
+    
+    const autosaveToggle = document.getElementById('autosave-toggle');
+    const saveStatus = document.getElementById('save-status');
+
+    // Funciones para manejar el modal
+    function openModal() {
+      modal.classList.add('active');
+    }
+    
+    function closeModal() {
+      modal.classList.remove('active');
+    }
+
+    // Registrar evento onChange de la cuadrícula
+    grid.onChange(function(data) {
+      updateStatus();
+      
+      // Si el autosave está activado, guardar los cambios
+      if (autosaveToggle.checked) {
+        saveStatus.textContent = 'Guardando...';
+        
+        apiService.saveGrid(data)
+          .then(response => {
+            saveStatus.textContent = 'Guardado automático';
+            updateSavedTime();
+          })
+          .catch(error => {
+            saveStatus.textContent = 'Error al guardar';
+            showNotification('Error al guardar automáticamente', 'error');
+          });
+      }
+    });
+
+    // Mostrar formulario para agregar widget en modal
+    addWidgetBtn.addEventListener('click', () => {
+      // Obtener un espacio vacío para sugerir posición
+      const emptySpace = grid.findEmptySpace(3, 2);
+      document.getElementById('widget-x').value = emptySpace.x;
+      document.getElementById('widget-y').value = emptySpace.y;
+      
+      openModal();
+    });
+
+    // Cerrar modal al hacer clic en cancelar
+    cancelWidgetBtn.addEventListener('click', closeModal);
+    
+    // Cerrar modal al hacer clic en la X
+    closeModalBtn.addEventListener('click', closeModal);
+    
+    // Cerrar modal al hacer clic fuera de él
+    modal.addEventListener('click', function(e) {
+      if (e.target === modal) {
+        closeModal();
+      }
+    });
+
+    // Crear widget
+    createWidgetBtn.addEventListener('click', () => {
+      const x = parseInt(document.getElementById('widget-x').value);
+      const y = parseInt(document.getElementById('widget-y').value);
+      const width = parseInt(document.getElementById('widget-width').value);
+      const height = parseInt(document.getElementById('widget-height').value);
+      const title = document.getElementById('widget-title').value;
+      const content = document.getElementById('widget-content').value;
+      
+      // Crear el widget
+      grid.addWidget({
+        x: x,
+        y: y,
+        width: width,
+        height: height,
+        content: `
+          <div class="widget-content">
+            ${content}
+          </div>
+        `,
+        id: `widget-${Date.now()}`,
+        title: title
+      });
+      
+      // Cerrar el modal
+      closeModal();
+      
+      // Mostrar notificación
+      showNotification('Widget creado con éxito', 'success');
+      
+      // Actualizar estado
+      updateStatus();
+    });
+
+    // Limpiar cuadrícula
+    clearGridBtn.addEventListener('click', () => {
+      if (confirm('¿Estás seguro de que quieres limpiar la cuadrícula?')) {
+        grid.clear();
+        showNotification('Cuadrícula limpiada', 'info');
+        updateStatus();
+      }
+    });
+
+    // Guardar estado
+    saveGridBtn.addEventListener('click', () => {
+      const data = grid.serialize();
+      saveStatus.textContent = 'Guardando...';
+      
+      apiService.saveGrid(data)
+        .then(response => {
+          showNotification('Estado guardado con éxito', 'success');
+          saveStatus.textContent = 'Guardado manual';
+          updateSavedTime();
+        })
+        .catch(error => {
+          showNotification('Error al guardar el estado', 'error');
+          saveStatus.textContent = 'Error al guardar';
+        });
+    });
+
+    // Cargar estado
+    loadGridBtn.addEventListener('click', () => {
+      saveStatus.textContent = 'Cargando...';
+      
+      apiService.loadGrid()
+        .then(response => {
+          if (response.data && response.data.length > 0) {
+            grid.load(response.data);
+            showNotification('Estado cargado con éxito', 'success');
+            updateStatus();
+          } else {
+            showNotification('No hay datos guardados para cargar', 'info');
+          }
+          saveStatus.textContent = '';
+        })
+        .catch(error => {
+          showNotification('Error al cargar el estado', 'error');
+          saveStatus.textContent = 'Error al cargar';
+        });
+    });
+
+    // Toggle de arrastrar
+    dragToggle.addEventListener('change', () => {
+      grid.enableDragging(dragToggle.checked);
+      showNotification(`Arrastrar ${dragToggle.checked ? 'activado' : 'desactivado'}`, 'info');
+    });
+
+    // Toggle de redimensionar
+    resizeToggle.addEventListener('change', () => {
+      grid.enableResizing(resizeToggle.checked);
+      showNotification(`Redimensionar ${resizeToggle.checked ? 'activado' : 'desactivado'}`, 'info');
+    });
+
+    // Toggle de eliminar
+    removeToggle.addEventListener('change', () => {
+      grid.enableRemoving(removeToggle.checked);
+      showNotification(`Eliminar ${removeToggle.checked ? 'activado' : 'desactivado'}`, 'info');
+    });
+
+    swappableToggle.addEventListener('change', () => {
+      grid.enableSwap(swappableToggle.checked);
+      showNotification(`Intercambio ${swappableToggle.checked ? 'activado' : 'desactivado'}`, 'info');
+    });
+
+    // Toggle de autosave
+    autosaveToggle.addEventListener('change', () => {
+      if (autosaveToggle.checked) {
+        showNotification('Guardado automático activado', 'info');
+        saveStatus.textContent = 'Autoguardado activo';
+      } else {
+        showNotification('Guardado automático desactivado', 'info');
+        saveStatus.textContent = '';
+      }
+    });
+
+    // Agregar algunos widgets iniciales para demostración
+    window.addEventListener('DOMContentLoaded', () => {
+      // Intentar cargar datos guardados
+      apiService.loadGrid()
+        .then(response => {
+          if (response.data && response.data.length > 0) {
+            grid.load(response.data);
+            updateStatus();
+            showNotification('Datos cargados de la sesión anterior', 'info');
+          } else {
+            // Cargar widgets de demostración si no hay datos guardados
+            // Widget 1
+            grid.addWidget({
+              x: 0,
+              y: 0,
+              width: 3,
+              height: 2,
+              content: `
+                <div class="widget-content">
+                  <h3>Widget de Ejemplo 1</h3>
+                  <p>Este es un widget de demostración. Puedes arrastrarlo, redimensionarlo y eliminarlo.</p>
+                </div>
+              `
+            });
+            
+            // Widget 2
+            grid.addWidget({
+              x: 4,
+              y: 0,
+              width: 4,
+              height: 3,
+              content: `
+                <div class="widget-content">
+                  <h3>Widget de Ejemplo 2</h3>
+                  <p>Este es un widget más grande con más contenido para demostrar la funcionalidad.</p>
+                  <ul>
+                    <li>Arrastrar desde la barra superior</li>
+                    <li>Redimensionar desde la esquina inferior derecha</li>
+                    <li>Eliminar con el botón X</li>
+                  </ul>
+                </div>
+              `
+            });
+            
+            // Widget 3
+            grid.addWidget({
+              x: 8,
+              y: 0,
+              width: 2,
+              height: 4,
+              content: `
+                <div class="widget-content">
+                  <h3>Widget Alto</h3>
+                  <p>Este widget es más alto que ancho.</p>
+                  <p>Demuestra la flexibilidad del diseño.</p>
+                </div>
+              `
+            });
+            
+            updateStatus();
+          }
+        })
+        .catch(() => {
+          // En caso de error, cargar widgets de demostración
+          showNotification('No se pudieron cargar datos guardados', 'error');
+          
+          // Widget de demostración
+          grid.addWidget({
+            x: 0,
+            y: 0,
+            width: 6,
+            height: 3,
+            content: `
+              <div class="widget-content">
+                <h3>Bienvenido a DragGrid</h3>
+                <ul>
+                  <li>Arrastrar y soltar widgets</li>
+                  <li>Redimensionar widgets</li>
+                  <li>Guardar y cargar layouts</li>
+                  <li>Actualización mediante AJAX/fetch</li>
+                </ul>
+              </div>
+            `
+          });
+          
+          updateStatus();
+        });
+    });
+
+    // Manejar el cierre de la ventana para guardar estado
+    window.addEventListener('beforeunload', () => {
+      const data = grid.serialize();
+      localStorage.setItem('DragGridData', JSON.stringify(data));
+    });
+
+    // Función para simular el endpoint para guardar la cuadrícula
+    async function handleFetch(url, options) {
+      if (url === API_CONFIG.saveUrl) {
+        try {
+          const data = JSON.parse(options.body);
+          localStorage.setItem('DragGridData', JSON.stringify(data));
+          return { ok: true, json: () => Promise.resolve({ success: true }) };
+        } catch (error) {
+          return { ok: false, json: () => Promise.reject({ success: false }) };
+        }
+      } else if (url === API_CONFIG.loadUrl) {
+        try {
+          const data = localStorage.getItem('DragGridData');
+          return { 
+            ok: true, 
+            json: () => Promise.resolve({ success: true, data: data ? JSON.parse(data) : [] }) 
+          };
+        } catch (error) {
+          return { ok: false, json: () => Promise.reject({ success: false }) };
+        }
+      }
+      
+      return { ok: false };
+    }
+
+    // Sobrescribir fetch para simular API
+    const originalFetch = window.fetch;
+    window.fetch = function(url, options) {
+      // Si es una de nuestras URLs simuladas
+      if (url === API_CONFIG.saveUrl || url === API_CONFIG.loadUrl) {
+        return new Promise((resolve) => {
+          // Simular latencia de red
+          setTimeout(() => {
+            resolve(handleFetch(url, options));
+          }, 800);
+        });
+      }
+      
+      // Caso contrario, usar fetch original
+      return originalFetch(url, options);
+    }
+    grid.items.forEach(item => {
+  item.el.addEventListener('click', (e) => {
+    if (e.ctrlKey || e.metaKey) {  // Con tecla Control/Cmd
+      const isSelected = item.el.classList.contains('widget-selected');
+      grid.selectWidget(item.el, !isSelected);
+      
+      if (!isSelected) {
+        selectedWidgets.push(item.el);
+        if (selectedWidgets.length === 2) {
+          // Intercambiar los dos widgets seleccionados
+          grid.swapWidgets(selectedWidgets[0], selectedWidgets[1]);
+          
+          // Limpiar selección
+          selectedWidgets.forEach(widget => grid.selectWidget(widget, false));
+          selectedWidgets = [];
+        }
+      } else {
+        // Quitar de la selección
+        selectedWidgets = selectedWidgets.filter(w => w !== item.el);
+      }
+    }
+  });
+});
+  </script>
+</body>
+</html>
