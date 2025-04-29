@@ -1,4 +1,5 @@
-# DragGrid
+
+![DragGrid Logo](https://raw.githubusercontent.com/juansueldo/draggrid/refs/heads/main/img/logo-complete.png)
 
 Una biblioteca JavaScript ligera para crear layouts de cuadrícula con elementos arrastrables y redimensionables, perfecta para crear dashboards, paneles de control, y otros sistemas de interfaz modulares.
 
@@ -49,7 +50,6 @@ grid.addWidget({
 |--------|------|---------------|------------|
 | `columns` | Number | 12 | Número de columnas en la cuadrícula |
 | `rowHeight` | Number | 50 | Altura de cada fila en píxeles |
-| `animate` | Boolean | true | Activar animaciones |
 | `minWidth` | Number | 100 | Ancho mínimo de un widget en píxeles |
 | `margin` | Number | 10 | Margen entre widgets en píxeles |
 | `acceptWidgets` | Boolean | true | Permitir añadir nuevos widgets |
