@@ -692,12 +692,13 @@ class DragGrid {
       height: 2,
       content: '',
       title: '',
-      id: `widget-${Date.now()}`
+      id: `widget-${Date.now()}`,
+      class: ''
     };
 
     const config = Object.assign({}, defaults, options);
     const element = document.createElement('div');
-    element.className = 'drag-grid-item';
+    element.className = `drag-grid-item ${config.class}`;
     element.id = config.id;
     
     // Establecer atributos de datos para la posición y tamaño
@@ -977,7 +978,8 @@ class DragGrid {
         width: parseInt(item.el.getAttribute('data-gs-width')),
         height: parseInt(item.el.getAttribute('data-gs-height')),
         content: item.el.querySelector('.drag-grid-item-content').innerHTML,
-        title: item.config.title || ''
+        title: item.config.title || '',
+        class: item.config.class || ''
       };
     });
   }
@@ -1009,7 +1011,8 @@ class DragGrid {
             width: parseInt(item.width) || 3,
             height: parseInt(item.height) || 2,
             content: item.content || '',
-            title: item.title || ''
+            title: item.title || '',
+            class: item.class || ''
           });
         });
       }
