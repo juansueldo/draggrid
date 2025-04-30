@@ -41,6 +41,7 @@ grid.addWidget({
   height: 2,             // Alto en unidades de fila
   content: 'Contenido del widget', // Contenido HTML
   title: 'Mi Widget'     // Título del widget
+  class: 'my-class'      // Clase para el widget
 });
 ```
 
@@ -77,6 +78,7 @@ grid.addWidget({
   content: '<p>Hola mundo</p>', // Contenido HTML
   title: 'Mi Widget',    // Título del widget (opcional)
   id: 'widget-1'         // ID personalizado (opcional)
+  class: 'my-class'      // Clase personalizada para el widget (opcional)
 });
 ```
 
