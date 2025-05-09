@@ -11,10 +11,10 @@
       margin: 0;
       padding: 20px;
       color: #333;
-      background-color: #211f1f;
+      background-color: #692f2f;
     }
     .header {
-      background-color: white;
+      background-color: #ffffff;
       color: #211f1f;
       padding: 15px 20px;
       border-radius: 5px;
@@ -37,7 +37,7 @@
     .controls {
       margin-bottom: 20px;
       padding: 15px;
-      background-color: #292930;
+      background-color: #222222;
       color: #ccc;
       border-radius: 5px;
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
@@ -52,16 +52,18 @@
     }
     button {
       padding: 8px 12px;
-      background-color: #4CAF50;
+      background-color: #333;
       color: white;
-      border: none;
+      border: 1px solid #444;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
       border-radius: 4px;
       cursor: pointer;
       font-size: 14px;
       transition: background-color 0.3s;
     }
     button:hover {
-      background-color: #45a049;
+      background-color: #fff;
+      color: #333;
     }
     button.secondary {
       background-color: #2196F3;
@@ -81,6 +83,7 @@
       border: 1px solid #242222;
       background-color: #fafafa;
       border-radius: 5px;
+      margin-bottom: 1.5rem;
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
     .modal-overlay {
@@ -103,7 +106,8 @@
       visibility: visible;
     }
     .modal-content {
-      background-color: white;
+      background-color: #222222;
+      color: #fff;
       border-radius: 8px;
       box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
       width: 100%;
@@ -116,7 +120,7 @@
     }
     .modal-header {
       padding: 15px 20px;
-      border-bottom: 1px solid #eee;
+      border-bottom: 1px solid #444;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -127,7 +131,9 @@
     }
     .modal-close {
       background: none;
-      border: none;
+      width: 40px;
+      border: 1px solid #444;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
       font-size: 20px;
       color: #777;
       cursor: pointer;
@@ -138,7 +144,7 @@
     }
     .modal-footer {
       padding: 15px 20px;
-      border-top: 1px solid #eee;
+      border-top: 1px solid #444;
       text-align: right;
     }
     /* Fin de estilos del modal */
@@ -155,8 +161,11 @@
       width: 100%;
       padding: 8px;
       box-sizing: border-box;
-      border: 1px solid #ddd;
+      border: 1px solid #444;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
       border-radius: 4px;
+      background: #211f1f;
+      color: #fff;
     }
     .notifications {
       position: fixed;
@@ -210,6 +219,7 @@
       color: #666;
       display: flex;
       justify-content: space-between;
+      z-index: 1000;
     }
     .toggle-switch {
       display: inline-flex;
@@ -253,7 +263,7 @@
       border-radius: 50%;
     }
     input:checked + .slider {
-      background-color: #4CAF50;
+      background-color: #1e9d22;
     }
     input:checked + .slider:before {
       transform: translateX(16px);
@@ -271,18 +281,18 @@
   
   <div class="controls">
     <div class="control-group">
-      <h3>Controles</h3>
+      <h3>Controls</h3>
       <div class="button-group">
-        <button id="add-widget">Agregar Widget</button>
-        <button id="clear-grid" class="danger">Limpiar Cuadrícula</button>
-        <button id="save-grid" class="secondary">Guardar Estado</button>
-        <button id="load-grid" class="secondary">Cargar Estado</button>
+        <button id="add-widget">Add Widget</button>
+        <button id="clear-grid" class="danger">Clear Grid</button>
+        <button id="save-grid" class="secondary">Save Status</button>
+        <button id="load-grid" class="secondary">Load Status</button>
       </div>
     </div>
     
     <div class="control-group">
       <div class="toggle-switch">
-        <label for="drag-toggle">Arrastrar:</label>
+        <label for="drag-toggle">Slider:</label>
         <label class="switch">
           <input type="checkbox" id="drag-toggle" checked>
           <span class="slider"></span>
@@ -290,7 +300,7 @@
       </div>
       
       <div class="toggle-switch">
-        <label for="resize-toggle">Redimensionar:</label>
+        <label for="resize-toggle">Resize:</label>
         <label class="switch">
           <input type="checkbox" id="resize-toggle" checked>
           <span class="slider"></span>
@@ -298,7 +308,7 @@
       </div>
       
       <div class="toggle-switch">
-        <label for="remove-toggle">Eliminar:</label>
+        <label for="remove-toggle">Delete:</label>
         <label class="switch">
           <input type="checkbox" id="remove-toggle" checked>
           <span class="slider"></span>
@@ -306,7 +316,7 @@
       </div>
 
       <div class="toggle-switch">
-        <label for="swappable-toggle">Intercambiar:</label>
+        <label for="swappable-toggle">Swappable:</label>
         <label class="switch">
           <input type="checkbox" id="swappable-toggle" checked>
           <span class="slider"></span>
@@ -315,7 +325,7 @@
       
       
       <div class="toggle-switch">
-        <label for="autosave-toggle">Auto guardar:</label>
+        <label for="autosave-toggle">Auto save:</label>
         <label class="switch">
           <input type="checkbox" id="autosave-toggle">
           <span class="slider"></span>
@@ -328,51 +338,51 @@
   <div id="widget-modal" class="modal-overlay">
     <div class="modal-content">
       <div class="modal-header">
-        <h3>Configuración del Widget</h3>
+        <h3>Configuration Widget</h3>
         <button class="modal-close" id="close-modal">&times;</button>
       </div>
       <div class="modal-body">
         <div class="form-group">
-          <label for="widget-x">Posición X:</label>
+          <label for="widget-x">Axis X:</label>
           <input type="number" id="widget-x" min="0" max="11" value="0">
         </div>
         <div class="form-group">
-          <label for="widget-y">Posición Y:</label>
+          <label for="widget-y">Axis Y:</label>
           <input type="number" id="widget-y" min="0" value="0">
         </div>
         <div class="form-group">
-          <label for="widget-width">Ancho:</label>
+          <label for="widget-width">Width:</label>
           <input type="number" id="widget-width" min="1" max="12" value="3">
         </div>
         <div class="form-group">
-          <label for="widget-height">Alto:</label>
+          <label for="widget-height">Height:</label>
           <input type="number" id="widget-height" min="1" max="10" value="2">
         </div>
         <div class="form-group">
-          <label for="widget-title">Título:</label>
+          <label for="widget-title">Title:</label>
           <input type="text" id="widget-title" value="Nuevo Widget">
         </div>
         <div class="form-group">
-          <label for="widget-content">Contenido:</label>
-          <textarea id="widget-content" rows="4">Este es el contenido del widget.</textarea>
+          <label for="widget-content">Content:</label>
+          <textarea id="widget-content" rows="4"></textarea>
         </div>
       </div>
       <div class="modal-footer">
-        <button id="cancel-widget" class="secondary">Cancelar</button>
-        <button id="create-widget">Crear</button>
+        <button id="cancel-widget" class="secondary">Cancel</button>
+        <button id="create-widget">Add</button>
       </div>
     </div>
   </div>
   
   <div id="grid" class="grid-container"></div>
   
-  <div class="status-bar">
+  
+  <div id="notifications" class="notifications"></div>
+  <div class="status-bar ">
     <div id="grid-status">Widgets: 0</div>
     <div>© 2025 DragGrid - By Juan Sueldo</div>
     <div id="save-status"></div>
   </div>
-  
-  <div id="notifications" class="notifications"></div>
 
   <!-- Incluir primero la biblioteca DragGrid -->
   <script src="/js/draggrid.js"></script>
@@ -458,6 +468,7 @@
       draggable: true,
       resizable: true,
       removable: true,
+      animate: true,
       swappable: true
     });
 
@@ -645,6 +656,14 @@
       }
     });
 
+    const initialWidgets = [
+      { id:1, x: 0,  y: 0,  width: 4,  height: 3,  content: "",  title: "1"},
+      { id:2, x: 4,  y: 0,  width: 3,  height: 3,  content: "",  title: "2"},
+      { id:3, x: 7,  y: 0,  width: 3,  height: 3,  content: "",   title: "3"},
+      { id:4, x: 10, y: 0,  width: 2,  height: 10, content: "",  title: "4"},
+      { id:5, x: 0,  y: 3,  width: 7,  height: 7,  content: "",   title: "5"},
+      { id:6, x: 7,  y: 3,  width: 3,  height: 7,  content: "",   title: "6"},
+    ]
     // Agregar algunos widgets iniciales para demostración
     window.addEventListener('DOMContentLoaded', () => {
       // Intentar cargar datos guardados
@@ -657,53 +676,18 @@
           } else {
             // Cargar widgets de demostración si no hay datos guardados
             // Widget 1
-            grid.addWidget({
-              x: 0,
-              y: 0,
-              width: 3,
-              height: 4,
-              content: `
-                <div class="widget-content">
-                  <h3>Widget de Ejemplo 1</h3>
-                  <p>Este es un widget de demostración. Puedes arrastrarlo, redimensionarlo y eliminarlo.</p>
-                </div>
-              `
-            });
-            
-            // Widget 2
-            grid.addWidget({
-              x: 4,
-              y: 0,
-              width: 4,
-              height: 5,
-              content: `
-                <div class="widget-content">
-                  <h3>Widget de Ejemplo 2</h3>
-                  <p>Este es un widget más grande con más contenido para demostrar la funcionalidad.</p>
-                  <ul>
-                    <li>Arrastrar desde la barra superior</li>
-                    <li>Redimensionar desde la esquina inferior derecha</li>
-                    <li>Eliminar con el botón X</li>
-                  </ul>
-                </div>
-              `
-            });
-            
-            // Widget 3
-            grid.addWidget({
-              x: 8,
-              y: 0,
-              width: 2,
-              height: 8,
-              content: `
-                <div class="widget-content">
-                  <h3>Widget Alto</h3>
-                  <p>Este widget es más alto que ancho.</p>
-                  <p>Demuestra la flexibilidad del diseño.</p>
-                </div>
-              `
-            });
-            
+            initialWidgets.forEach((element)=>{
+              grid.addWidget({
+                id: element.id,
+                x: element.x,
+                y: element.y,
+                width: element.width,
+                height: element.height,
+                title: element.title,
+                content: element.content
+              });
+            })
+           
             updateStatus();
           }
         })
