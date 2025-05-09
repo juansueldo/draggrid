@@ -74,13 +74,14 @@ class DragGrid {
         .drag-grid-container {
           position: relative;
           width: 100%;
-          background: rgba(250, 250, 250, 0.2);
+          background: #222222;
           min-height: 100px;
         }
         .drag-grid-item {
           position: absolute;
-          background: #fff;
-          border: 1px solid #ddd;
+          background: #333;
+          color: #fff;
+          border: 1px solid #444;
           border-radius: 5px;
           box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
           transition: all 0.2s ease;
@@ -429,70 +430,321 @@ class DragGrid {
       // Disparar evento de cambio
       this._triggerChange();
   }
-  /**
-   * Manejador de movimiento durante el redimensionamiento
-   */
-  _handleResizeMove(e) {
-    if (!this.isResizing || !this.resizeItem) return;
-    
-    const deltaX = e.clientX - this.startX;
-    const deltaY = e.clientY - this.startY;
-    
-    // Calcular nuevo ancho y alto en unidades de cuadrícula
-    const colWidth = this.container.offsetWidth / this.options.columns;
-    const newWidthPx = Math.max(this.startWidth + deltaX, this.options.minWidth);
-    const newHeightPx = Math.max(this.startHeight + deltaY, this.options.rowHeight);
-    
-    const newWidth = Math.round(newWidthPx / colWidth);
-    const newHeight = Math.round(newHeightPx / this.options.rowHeight);
-    
-    // Actualizar placeholder
-    this._updatePlaceholder(this.startPosX, this.startPosY, newWidth, newHeight);
-    
-    // Comprobar si es posible el redimensionamiento
-    if (this._canFit(this.startPosX, this.startPosY, newWidth, newHeight, this.resizeItem.id)) {
-      this.placeholderElement.style.display = 'block';
-    } else {
-      this.placeholderElement.style.display = 'none';
-    }
-  }
+ /**
+  * Manejador de movimiento durante el redimensionamiento
+  */
+ _handleResizeMove(e) {
+  if (!this.isResizing || !this.resizeItem) return;
+
+  const deltaX = e.clientX - this.startX;
+  const deltaY = e.clientY - this.startY;
+
+  // Calcular nuevo ancho y alto en unidades de cuadrícula
+  const colWidth = this.container.offsetWidth / this.options.columns;
+  let newWidthPx = Math.max(this.startWidth + deltaX, this.options.minWidth);
+  const newHeightPx = Math.max(this.startHeight + deltaY, this.options.rowHeight);
   
-  /**
-   * Manejador de fin de redimensionamiento
-   */
-  _handleResizeEnd(e) {
-    if (!this.isResizing || !this.resizeItem) return;
-    
-    // Obtener nuevo tamaño
-    const colWidth = this.container.offsetWidth / this.options.columns;
-    const deltaX = e.clientX - this.startX;
-    const deltaY = e.clientY - this.startY;
-    
-    const newWidthPx = Math.max(this.startWidth + deltaX, this.options.minWidth);
-    const newHeightPx = Math.max(this.startHeight + deltaY, this.options.rowHeight);
-    
-    const newWidth = Math.round(newWidthPx / colWidth);
-    const newHeight = Math.round(newHeightPx / this.options.rowHeight);
-    
-    // Verificar si es posible el redimensionamiento
-    if (this._canFit(this.startPosX, this.startPosY, newWidth, newHeight, this.resizeItem.id)) {
-      this.resizeWidget(this.resizeItem, newWidth, newHeight);
-    }
-    
-    // Limpiar estado
-    this.resizeItem.classList.remove('resizing');
-    this.isResizing = false;
-    this.resizeItem = null;
-    this.placeholderElement.style.display = 'none';
-    
-    // Eliminar eventos temporales
-    document.removeEventListener('mousemove', this._handleResizeMove);
-    document.removeEventListener('mouseup', this._handleResizeEnd);
-    
-    // Disparar evento de cambio
-    this._triggerChange();
+  // Encontrar el widget actual y su posición X
+  const itemIndex = this.items.findIndex(item => item.el === this.resizeItem);
+  const currentX = itemIndex !== -1 ? this.items[itemIndex].config.x : 0;
+  
+  // Calcular el ancho máximo disponible para no exceder el límite del contenedor
+  const maxAvailableWidth = (this.options.columns - currentX) * colWidth;
+  
+  // Limitar el nuevo ancho al máximo disponible
+  newWidthPx = Math.min(newWidthPx, maxAvailableWidth);
+
+  const newWidth = Math.round(newWidthPx / colWidth);
+  const newHeight = Math.round(newHeightPx / this.options.rowHeight);
+
+  // Actualizar placeholder
+  this._updatePlaceholder(this.startPosX, this.startPosY, newWidth, newHeight);
+
+  // Siempre mostrar el placeholder porque vamos a permitir redimensionar
+  // incluso si hay elementos debajo (los desplazaremos)
+  this.placeholderElement.style.display = 'block';
+}
+
+/**
+* Manejador de fin de redimensionamiento
+*/
+_handleResizeEnd(e) {
+  if (!this.isResizing || !this.resizeItem) return;
+
+  const colWidth = this.container.offsetWidth / this.options.columns;
+  const deltaX = e.clientX - this.startX;
+  const deltaY = e.clientY - this.startY;
+
+  // Encontrar el widget actual y su posición X
+  const itemIndex = this.items.findIndex(item => item.el === this.resizeItem);
+  if (itemIndex === -1) return;
+  
+  const currentConfig = this.items[itemIndex].config;
+  const currentX = currentConfig.x;
+  
+  // Calcular el ancho máximo disponible para no exceder el límite del contenedor
+  const maxAvailableWidth = (this.options.columns - currentX) * colWidth;
+
+  let newWidthPx = Math.max(this.startWidth + deltaX, this.options.minWidth);
+  // Limitar el nuevo ancho al máximo disponible
+  newWidthPx = Math.min(newWidthPx, maxAvailableWidth);
+  
+  const newHeightPx = Math.max(this.startHeight + deltaY, this.options.rowHeight);
+
+  const newWidth = Math.round(newWidthPx / colWidth);
+  const newHeight = Math.round(newHeightPx / this.options.rowHeight);
+
+  const widthDiff = newWidth - currentConfig.width;
+  const heightDiff = newHeight - currentConfig.height;
+
+  // 1. Si hay expansión horizontal, desplazar elementos a la derecha
+  if (widthDiff > 0) {
+    this._shiftWidgetsRight(
+      currentConfig.x + currentConfig.width,
+      currentConfig.y,
+      widthDiff,
+      Math.max(currentConfig.height, newHeight), // considerar nueva altura también
+      currentConfig.id
+    );
   }
 
+  // 2. Si hay expansión vertical, desplazar elementos hacia abajo
+  if (heightDiff > 0) {
+    this._shiftWidgetsDown(
+      currentConfig.x,
+      currentConfig.y + currentConfig.height,
+      Math.max(currentConfig.width, newWidth), // considerar nuevo ancho también
+      heightDiff,
+      currentConfig.id
+    );
+  }
+
+  // 3. Liberar espacio actual
+  this._freeGridSpace(currentConfig.id);
+
+  // 4. Actualizar tamaño
+  currentConfig.width = newWidth;
+  currentConfig.height = newHeight;
+
+  // 5. Actualizar el DOM
+  this.resizeItem.setAttribute('data-gs-width', newWidth);
+  this.resizeItem.setAttribute('data-gs-height', newHeight);
+  this._updateElementStyles(this.resizeItem, currentConfig);
+
+  // 6. Ocupar nuevo espacio
+  this._occupyGrid(currentConfig);
+
+  // 7. Disparar cambio
+  this._triggerChange();
+  this._resolveCollisions();
+
+  // Limpiar estado
+  this.resizeItem.classList.remove('resizing');
+  this.isResizing = false;
+  this.resizeItem = null;
+  this.placeholderElement.style.display = 'none';
+
+  document.removeEventListener('mousemove', this._handleResizeMove);
+  document.removeEventListener('mouseup', this._handleResizeEnd);
+
+  this._updateContainerHeight();
+}
+
+  /**
+   * Desplaza los widgets hacia la derecha para hacer espacio
+   * @param {number} startX - Posición X inicial de la región a desplazar
+   * @param {number} startY - Posición Y inicial de la región a desplazar
+   * @param {number} widthToAdd - Cantidad de columnas a desplazar
+   * @param {number} height - Alto de la región en filas
+   * @param {string} skipId - ID del widget que no debe ser desplazado
+   */
+  _shiftWidgetsRight(startX, startY, widthToAdd, height, skipId) {
+    // Identificar los widgets afectados
+    const affectedWidgets = [];
+    
+    for (let i = 0; i < this.items.length; i++) {
+      const widget = this.items[i];
+      if (widget.config.id === skipId) continue;
+      
+      // Verificar si este widget está a la derecha del área de expansión
+      const widgetX = widget.config.x;
+      const widgetY = widget.config.y;
+      const widgetWidth = widget.config.width;
+      const widgetHeight = widget.config.height;
+      
+      // Comprobar si hay superposición en el eje Y
+      const yOverlap = (widgetY < startY + height) && (widgetY + widgetHeight > startY);
+      
+      // Comprobar si el widget está a la derecha del área que queremos expandir
+      const isToRight = widgetX >= startX;
+      
+      if (yOverlap && isToRight) {
+        affectedWidgets.push({
+          index: i,
+          currentX: widgetX
+        });
+      }
+    }
+    
+    // Ordenar widgets por posición X, de derecha a izquierda
+    // para evitar conflictos al desplazar
+    affectedWidgets.sort((a, b) => b.currentX - a.currentX);
+    
+    // Desplazar cada widget afectado
+    for (const widget of affectedWidgets) {
+      const config = this.items[widget.index].config;
+      const element = this.items[widget.index].el;
+      
+      // Comprobar si el widget se saldría de los límites de la cuadrícula
+      if (config.x + widthToAdd + config.width > this.options.columns) {
+        // Si se sale, desplazarlo hacia abajo en lugar de a la derecha
+        const newY = config.y + height;
+        
+        // Liberar espacio actual
+        this._freeGridSpace(config.id);
+        
+        // Actualizar posición
+        config.x = 0; // Llevarlo al inicio de la siguiente fila
+        config.y = newY;
+        
+        // Actualizar DOM
+        element.setAttribute('data-gs-x', config.x);
+        element.setAttribute('data-gs-y', config.y);
+        this._updateElementStyles(element, config);
+        
+        // Ocupar nuevo espacio
+        this._occupyGrid(config);
+      } else {
+        // Liberar espacio actual
+        this._freeGridSpace(config.id);
+        
+        // Actualizar posición X
+        config.x = config.x + widthToAdd;
+        
+        // Actualizar DOM
+        element.setAttribute('data-gs-x', config.x);
+        this._updateElementStyles(element, config);
+        
+        // Ocupar nuevo espacio
+        this._occupyGrid(config);
+      }
+    }
+  }
+
+  /**
+   * Desplaza los widgets hacia abajo para hacer espacio
+   * @param {number} startX - Posición X inicial de la región a desplazar
+   * @param {number} startY - Posición Y inicial de la región a desplazar
+   * @param {number} width - Ancho de la región en columnas
+   * @param {number} heightToAdd - Cantidad de filas a desplazar
+   * @param {string} skipId - ID del widget que no debe ser desplazado
+   */
+  _shiftWidgetsDown(startX, startY, width, heightToAdd, skipId) {
+    // Identificar los widgets afectados
+    const affectedWidgets = [];
+    
+    for (let i = 0; i < this.items.length; i++) {
+      const widget = this.items[i];
+      if (widget.config.id === skipId) continue;
+      
+      // Verificar si este widget está debajo del área de expansión
+      const widgetY = widget.config.y;
+      const widgetX = widget.config.x;
+      const widgetWidth = widget.config.width;
+      const widgetHeight = widget.config.height;
+      
+      // Comprobar si hay superposición en el eje X
+      const xOverlap = (widgetX < startX + width) && (widgetX + widgetWidth > startX);
+      
+      // Comprobar si el widget está debajo del área que queremos expandir
+      const isBelow = widgetY >= startY;
+      
+      if (xOverlap && isBelow) {
+        affectedWidgets.push({
+          index: i,
+          currentY: widgetY
+        });
+      }
+    }
+    
+    // Ordenar widgets por posición Y, de abajo hacia arriba
+    // para evitar conflictos al desplazar
+    affectedWidgets.sort((a, b) => b.currentY - a.currentY);
+    
+    // Desplazar cada widget afectado
+    for (const widget of affectedWidgets) {
+      const config = this.items[widget.index].config;
+      const element = this.items[widget.index].el;
+      
+      // Liberar espacio actual
+      this._freeGridSpace(config.id);
+      
+      // Actualizar posición Y
+      config.y = config.y + heightToAdd;
+      
+      // Actualizar DOM
+      element.setAttribute('data-gs-y', config.y);
+      this._updateElementStyles(element, config);
+      
+      // Ocupar nuevo espacio
+      this._occupyGrid(config);
+    }
+  }
+
+  /**
+   * Reacomoda los widgets para evitar colisiones tras redimensionamientos o desplazamientos
+   */
+  _resolveCollisions() {
+    // Recorremos todos los widgets ordenados por filas (Y) y columnas (X)
+    const sortedItems = [...this.items].sort((a, b) => {
+      if (a.config.y === b.config.y) return a.config.x - b.config.x;
+      return a.config.y - b.config.y;
+    });
+
+    const occupied = new Set();
+
+    for (const item of sortedItems) {
+      const { id, x, y, width, height } = item.config;
+
+      // Encontrar una posición libre si hay colisión
+      let newY = y;
+      while (this._isOccupied(x, newY, width, height, id)) {
+        newY++;
+      }
+
+      if (newY !== y) {
+        // Liberar espacio actual
+        this._freeGridSpace(id);
+
+        // Actualizar posición
+        item.config.y = newY;
+        item.el.setAttribute('data-gs-y', newY);
+        this._updateElementStyles(item.el, item.config);
+
+        // Ocupar nuevo espacio
+        this._occupyGrid(item.config);
+      }
+    }
+  }
+  /**
+   * Verifica si una región de la cuadrícula está ocupada por otro widget
+   */
+  _isOccupied(x, y, width, height, skipId = null) {
+    for (const item of this.items) {
+      if (item.config.id === skipId) continue;
+
+      const iX = item.config.x;
+      const iY = item.config.y;
+      const iW = item.config.width;
+      const iH = item.config.height;
+
+      const overlapX = x < iX + iW && x + width > iX;
+      const overlapY = y < iY + iH && y + height > iY;
+
+      if (overlapX && overlapY) return true;
+    }
+    return false;
+  }
   /**
    * Actualiza la posición y tamaño del placeholder
    * @param {number} x - Posición x
@@ -692,8 +944,8 @@ class DragGrid {
       height: 2,
       content: '',
       title: '',
-      id: `widget-${Date.now()}`,
-      class: ''
+      class: '',
+      id: `widget-${Date.now()}`
     };
 
     const config = Object.assign({}, defaults, options);
@@ -978,8 +1230,8 @@ class DragGrid {
         width: parseInt(item.el.getAttribute('data-gs-width')),
         height: parseInt(item.el.getAttribute('data-gs-height')),
         content: item.el.querySelector('.drag-grid-item-content').innerHTML,
-        title: item.config.title || '',
-        class: item.config.class || ''
+        class: item.config.class || '',
+        title: item.config.title || ''
       };
     });
   }
@@ -1011,8 +1263,8 @@ class DragGrid {
             width: parseInt(item.width) || 3,
             height: parseInt(item.height) || 2,
             content: item.content || '',
-            title: item.title || '',
-            class: item.class || ''
+            class: item.class || '',
+            title: item.title || ''
           });
         });
       }
