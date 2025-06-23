@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!--<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -334,7 +334,7 @@
     </div>
   </div>
   
-  <!-- Reemplazar el formulario actual con un modal -->
+
   <div id="widget-modal" class="modal-overlay">
     <div class="modal-content">
       <div class="modal-header">
@@ -384,7 +384,7 @@
     <div id="save-status"></div>
   </div>
 
-  <!-- Incluir primero la biblioteca DragGrid -->
+
   <script src="/js/draggrid.js"></script>
 
   <script>
@@ -789,5 +789,267 @@
   });
 });
   </script>
+</body>
+</html>
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DragGrid</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+<style>
+   
+    body {
+      font-family: Arial, sans-serif;
+      color: #fff;
+      background-color: rgb(3, 7, 18, 1);
+    }
+    .version{
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 0.75rem;
+        opacity: 0.6;
+    }
+    .subtitle{
+        font-size: 0.9rem;
+        opacity: 0.7;
+    }
+    .grid-container{
+        width: 100%;
+        min-height: 600px;
+        border-radius: 5px;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        background-color: rgba(5, 18, 58, 0.955) !important;
+    }
+    .drag-grid-drag-handle{
+        background: rebeccapurple;
+    }
+    .drag-grid-item-content {
+        background: rebeccapurple;
+    }
+
+</style>
+<body>
+    <header class="flex flex-col w-full items-center justify-center p-4">
+        <span class="version">v.1.0.0</span>
+        <h1 class="text-3xl font-bold">DragGrid</h1>
+        <h5 class="subtitle">A simple library for creating and managing resizable widgets on any web page.</h5>
+        <div class="mt-10 px-4 sm:px-0"> <span class="mb-4 text-xs font-medium opacity-60">Install the dependency</span>
+        <div class="flex w-full max-w-md items-center justify-between gap-x-2 rounded-md bg-gray-800 py-1 pl-4 pr-1 text-center backdrop-blur" > 
+            <pre class="flex text-sm">
+            <pre class="astro-code dracula" style="background-color:#282A36;color:#F8F8F2; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="plaintext"><code><span class="line"><span>npm install @jsdev/drag-grid</span></span></code></pre>
+            </pre> 
+            <button id="copyNpmInstall" aria-label="Copy npm install command" title="Copy" class="my-1 mr-2 inline-flex size-7 items-center justify-center whitespace-nowrap rounded-full bg-gray-950/60 text-sm font-medium text-gray-100 transition focus-visible:outline-none disabled:pointer-events-none" data-astro-cid-j7pv25f6=""> <svg width="16" height="16" stroke-width="1.5" viewBox="0 0 24 24" fill="none"><path d="M19.4 20H9.6C9.26863 20 9 19.7314 9 19.4V9.6C9 9.26863 9.26863 9 9.6 9H19.4C19.7314 9 20 9.26863 20 9.6V19.4C20 19.7314 19.7314 20 19.4 20Z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path><path d="M15 9V4.6C15 4.26863 14.7314 4 14.4 4H4.6C4.26863 4 4 4.26863 4 4.6V14.4C4 14.7314 4.26863 15 4.6 15H9" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path></svg> </button> </div>
+        </div>
+
+    </header>
+    <section class=" left-0 top-0 z-50 mb-8 flex flex-col items-center justify-center gap-4 px-6 py-2 sm:gap-6" id="option-inputs">
+        <div class="buttons flex flex-wrap items-center justify-center gap-4 px-6 py-2 sm:gap-6">
+            <button class="px-4 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition" id="add-widget" onclick="document.getElementById('modal').classList.remove('hidden')">Add Widget</button>
+            <button class="px-4 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 transition" id="clear-grid">Clear Grid</button>
+            <button class="px-4 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">Save Status</button>
+            <button class="px-4 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">Load Status</button>
+        </div>
+        <div class="selects flex flex-wrap items-center justify-center gap-4 px-6 py-2 sm:gap-6">
+
+            <div class="mt-4">
+                <label class="block font-mono text-xs font-medium text-gray-800 dark:text-gray-200">Slider</label>
+                <select name="slider" id="slider" class="mt-1 block w-full min-w-32 rounded-lg border border-gray-200 bg-gray-50 p-2 text-xs placeholder-opacity-80 dark:border-gray-700 dark:bg-gray-900" data-astro-cid-j7pv25f6=""> 
+                    <option value="true">Yes</option>
+                    <option value="false">No</option>
+                </select>
+            </div>
+            <div class="mt-4">
+                <label class="block font-mono text-xs font-medium text-gray-800 dark:text-gray-200">Resize</label>
+                <select name="resize-toggle" id="resize-toggle" class="mt-1 block w-full min-w-32 rounded-lg border border-gray-200 bg-gray-50 p-2 text-xs placeholder-opacity-80 dark:border-gray-700 dark:bg-gray-900" data-astro-cid-j7pv25f6=""> 
+                    <option value="true">Yes</option>
+                    <option value="false">No</option>
+                </select>
+            </div>
+            <div class="mt-4">
+                <label class="block font-mono text-xs font-medium text-gray-800 dark:text-gray-200">Delete</label>
+                <select name="remove-toggle" id="remove-toggle" class="mt-1 block w-full min-w-32 rounded-lg border border-gray-200 bg-gray-50 p-2 text-xs placeholder-opacity-80 dark:border-gray-700 dark:bg-gray-900" data-astro-cid-j7pv25f6=""> 
+                    <option value="true">Yes</option>
+                    <option value="false">No</option>
+                </select>
+            </div>
+                <div class="mt-4">
+                <label class="block font-mono text-xs font-medium text-gray-800 dark:text-gray-200">Swappable</label>
+                <select name="swappable-toggle" id="swappable-toggle" class="mt-1 block w-full min-w-32 rounded-lg border border-gray-200 bg-gray-50 p-2 text-xs placeholder-opacity-80 dark:border-gray-700 dark:bg-gray-900" data-astro-cid-j7pv25f6=""> 
+                    <option value="true">Yes</option>
+                    <option value="false">No</option>
+                </select>
+            </div>
+        </div>
+        
+    </section>
+    <div class="px-4">
+        <div id="grid" class="grid-container"></div>
+    </div>
+    <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg max-w-md w-full" style="background-color: rgb(3, 7, 18, 1) !important;">
+            <h2 class="text-lg font-semibold mb-4 text-gray-800 dark:text-white">Add Widget</h2>
+
+            <div class="modal-body space-y-4">
+                <div class="form-group">
+                    <label for="widget-x" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Axis X:</label>
+                    <input type="number" id="widget-x" min="0" max="11" value="0"
+                    class="mt-1 w-full rounded-md border-gray-300 border border-gray-200 bg-gray-50 p-2  dark:bg-gray-800 dark:text-white shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 dark:focus:ring-blue-400 focus:outline-none" />
+                </div>
+
+                <div class="form-group">
+                    <label for="widget-y" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Axis Y:</label>
+                    <input type="number" id="widget-y" min="0" value="0"
+                    class="mt-1 w-full rounded-md border-gray-300 border border-gray-200 bg-gray-50 p-2 dark:bg-gray-800 dark:text-white shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 dark:focus:ring-blue-400 focus:outline-none" />
+                </div>
+
+                <div class="form-group">
+                    <label for="widget-width" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Width:</label>
+                    <input type="number" id="widget-width" min="1" max="12" value="3"
+                    class="mt-1 w-full rounded-md border-gray-300 border border-gray-200 bg-gray-50 p-2 dark:bg-gray-800 dark:text-white shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 dark:focus:ring-blue-400 focus:outline-none" />
+                </div>
+
+                <div class="form-group">
+                    <label for="widget-height" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Height:</label>
+                    <input type="number" id="widget-height" min="1" max="10" value="2"
+                    class="mt-1 w-full rounded-md border-gray-300 border border-gray-200 bg-gray-50 p-2 dark:bg-gray-800 dark:text-white shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 dark:focus:ring-blue-400 focus:outline-none" />
+                </div>
+
+                <div class="form-group">
+                    <label for="widget-title" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Title:</label>
+                    <input type="text" id="widget-title" value="Nuevo Widget"
+                    class="mt-1 w-full rounded-md border-gray-300 border border-gray-200 bg-gray-50 p-2 dark:bg-gray-800 dark:text-white shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 dark:focus:ring-blue-400 focus:outline-none" />
+                </div>
+
+                <div class="form-group">
+                    <label for="widget-content" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Content:</label>
+                    <textarea id="widget-content" rows="4"
+                    class="mt-1 w-full rounded-md border-gray-300 p-2 border border-gray-200 bg-gray-50 dark:bg-gray-800 dark:text-white shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 dark:focus:ring-blue-400 focus:outline-none"></textarea>
+                </div>
+            </div>
+            
+            <div class="flex justify-end gap-2 mt-4">
+            <button
+                class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 dark:bg-gray-700 dark:hover:bg-gray-600"
+                onclick="document.getElementById('modal').classList.add('hidden')"
+            >
+                Cancel
+            </button>
+            <button class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700" id="create-widget" onclick="document.getElementById('modal').classList.add('hidden')">Save</button>
+            </div>
+        </div>
+    </div>
+     <footer class="mt-8 text-center text-sm text-gray-500 dark:text-gray-400">
+  Created by 
+  <a href="https://juansueldo.github.io" target="_blank" class="text-blue-600 hover:underline dark:text-blue-400">
+    Juan Sueldo
+  </a>
+</footer>
+
+     <script src="/js/draggrid.js"></script>
+     <script>
+        const clearGridBtn = document.getElementById('clear-grid');
+        const createWidgetBtn = document.getElementById('create-widget');
+        const addWidgetBtn = document.getElementById('add-widget');
+        const dragToggle = document.getElementById('slider');
+        const resizeToggle = document.getElementById('resize-toggle');
+        const removeToggle = document.getElementById('remove-toggle');
+        const swappableToggle = document.getElementById('swappable-toggle');
+        
+        const grid = new DragGrid('#grid', {
+            columns: 12,
+            rowHeight: 60,
+            margin: 5,
+            draggable: true,
+            resizable: true,
+            removable: true,
+            animate: true,
+            swappable: true
+        });
+        
+        const initialWidgets = [
+            { id:1, x: 0,  y: 0,  width: 4,  height: 3,  content: "",  title: "1"},
+            { id:2, x: 4,  y: 0,  width: 3,  height: 3,  content: "",  title: "2"},
+            { id:3, x: 7,  y: 0,  width: 3,  height: 3,  content: "",   title: "3"},
+            { id:4, x: 10, y: 0,  width: 2,  height: 7, content: "",  title: "4"},
+            { id:5, x: 0,  y: 3,  width: 7,  height: 4,  content: "",   title: "5"},
+            { id:6, x: 7,  y: 3,  width: 3,  height: 4,  content: "",   title: "6"},
+        ];
+        
+        initialWidgets.forEach((element)=>{
+            grid.addWidget({
+                id: element.id,
+                x: element.x,
+                y: element.y,
+                width: element.width,
+                height: element.height,
+                title: element.title,
+                content: element.content
+            });
+        });
+
+        clearGridBtn.addEventListener('click', () => {
+            if (confirm('¿Estás seguro de que quieres limpiar la cuadrícula?')) {
+                grid.clear();
+            }
+        });
+        
+        addWidgetBtn.addEventListener('click', () => {
+            const emptySpace = grid.findEmptySpace(3, 2);
+            document.getElementById('widget-x').value = emptySpace.x;
+            document.getElementById('widget-y').value = emptySpace.y;
+            
+        });
+
+        createWidgetBtn.addEventListener('click', () => {
+            const x = parseInt(document.getElementById('widget-x').value);
+            const y = parseInt(document.getElementById('widget-y').value);
+            const width = parseInt(document.getElementById('widget-width').value);
+            const height = parseInt(document.getElementById('widget-height').value);
+            const title = document.getElementById('widget-title').value;
+            const content = document.getElementById('widget-content').value;
+            
+            // Crear el widget
+            grid.addWidget({
+                x: x,
+                y: y,
+                width: width,
+                height: height,
+                content: `
+                <div class="widget-content">
+                    ${content}
+                </div>
+                `,
+                id: `widget-${Date.now()}`,
+                title: title
+            });
+            
+        });
+    
+        dragToggle.addEventListener('change', (e) => {
+            const isEnabled = e.target.value === 'true';
+            grid.enableDragging(isEnabled);      
+        });
+
+        resizeToggle.addEventListener('change', (e) => {
+            const isEnabled = e.target.value === 'true';
+            grid.enableResizing(isEnabled);
+        });
+
+
+        removeToggle.addEventListener('change', (e) => {
+            const isEnabled = e.target.value === 'true';
+            grid.enableRemoving(isEnabled);
+        });
+
+        swappableToggle.addEventListener('change', (e) => {
+            const isEnabled = e.target.value === 'true';
+            grid.enableSwap(isEnabled);
+        });
+     </script>
 </body>
 </html>
