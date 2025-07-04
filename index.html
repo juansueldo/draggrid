@@ -806,7 +806,7 @@
     body {
       font-family: Arial, sans-serif;
       color: #fff;
-      background-color: rgb(3, 7, 18, 1);
+      background-color: #030712;
     }
     .version{
         font-family: 'Courier New', Courier, monospace;
@@ -832,8 +832,39 @@
         background: rebeccapurple;
     }
 
+    /* Estilos para el contenedor de alertas */
+    .alerts-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1000;
+        max-width: 400px;
+        pointer-events: none;
+    }
+
+    .alert {
+        pointer-events: auto;
+        margin-bottom: 10px;
+        transform: translateX(100%);
+        opacity: 0;
+        transition: all 0.3s ease-in-out;
+    }
+
+    .alert.show {
+        transform: translateX(0);
+        opacity: 1;
+    }
+
+    .alert.hide {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+
 </style>
 <body>
+    <!-- Contenedor de alertas -->
+    <div id="alerts-container" class="alerts-container"></div>
+
     <header class="flex flex-col w-full items-center justify-center p-4">
         <span class="version">v.1.0.0</span>
         <h1 class="text-3xl font-bold">DragGrid</h1>
@@ -851,8 +882,8 @@
         <div class="buttons flex flex-wrap items-center justify-center gap-4 px-6 py-2 sm:gap-6">
             <button class="px-4 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition" id="add-widget" onclick="document.getElementById('modal').classList.remove('hidden')">Add Widget</button>
             <button class="px-4 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 transition" id="clear-grid">Clear Grid</button>
-            <button class="px-4 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">Save Status</button>
-            <button class="px-4 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">Load Status</button>
+            <button class="px-4 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition" id="save-status">Save Status</button>
+            <button class="px-4 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition" id="load-status">Load Status</button>
         </div>
         <div class="selects flex flex-wrap items-center justify-center gap-4 px-6 py-2 sm:gap-6">
 
@@ -941,13 +972,111 @@
 
      <script src="/js/draggrid.js"></script>
      <script>
-      const clearGridBtn = document.getElementById('clear-grid');
+// Función para mostrar alertas personalizadas
+function showAlert(message, type = 'info', duration = 4000) {
+    const alertsContainer = document.getElementById('alerts-container');
+    const alertId = 'alert-' + Date.now();
+    
+    // Colores según el tipo
+    const typeClasses = {
+        success: 'text-green-800 bg-green-50 dark:bg-gray-800 dark:text-green-400',
+        error: 'text-red-800 bg-red-50 dark:bg-gray-800 dark:text-red-400',
+        warning: 'text-yellow-800 bg-yellow-50 dark:bg-gray-800 dark:text-yellow-400',
+        info: 'text-blue-800 bg-blue-50 dark:bg-gray-800 dark:text-blue-400'
+    };
+    
+    // Iconos según el tipo
+    const typeIcons = {
+        success: `<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+        </svg>`,
+        error: `<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+        </svg>`,
+        warning: `<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+        </svg>`,
+        info: `<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+        </svg>`
+    };
+    
+    const alertElement = document.createElement('div');
+    alertElement.id = alertId;
+    alertElement.className = `alert p-4 text-sm rounded-lg shadow-lg ${typeClasses[type]} border border-opacity-20`;
+    alertElement.innerHTML = `
+        <div class="flex items-center">
+            <div class="flex-shrink-0 mr-3">
+                ${typeIcons[type]}
+            </div>
+            <div class="flex-1">
+                <span class="font-medium">${type.charAt(0).toUpperCase() + type.slice(1)}!</span>
+                <span class="ml-2">${message}</span>
+            </div>
+            <button class="ml-4 text-current opacity-50 hover:opacity-100 transition-opacity" onclick="hideAlert('${alertId}')">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                </svg>
+            </button>
+        </div>
+    `;
+    
+    alertsContainer.appendChild(alertElement);
+    
+    // Mostrar con animación
+    setTimeout(() => {
+        alertElement.classList.add('show');
+    }, 100);
+    
+    // Auto-hide después del tiempo especificado
+    setTimeout(() => {
+        hideAlert(alertId);
+    }, duration);
+}
+
+// Función para ocultar alertas
+function hideAlert(alertId) {
+    const alert = document.getElementById(alertId);
+    if (alert) {
+        alert.classList.add('hide');
+        setTimeout(() => {
+            alert.remove();
+        }, 300);
+    }
+}
+
+// Función para mostrar confirmación personalizada
+function showConfirmation(message, onConfirm) {
+    const confirmModal = document.createElement('div');
+    confirmModal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+    confirmModal.innerHTML = `
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg max-w-md w-full mx-4" style="background-color: rgb(3, 7, 18, 1) !important;">
+            <h3 class="text-lg font-semibold mb-4 text-gray-800 dark:text-white">Confirmar acción</h3>
+            <p class="text-gray-600 dark:text-gray-300 mb-6">${message}</p>
+            <div class="flex justify-end gap-2">
+                <button class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 dark:bg-gray-700 dark:hover:bg-gray-600" onclick="this.closest('.fixed').remove()">
+                    Cancelar
+                </button>
+                <button class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700" onclick="this.closest('.fixed').remove(); (${onConfirm.toString()})()">
+                    Confirmar
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(confirmModal);
+}
+
+const clearGridBtn = document.getElementById('clear-grid');
 const createWidgetBtn = document.getElementById('create-widget');
 const addWidgetBtn = document.getElementById('add-widget');
 const dragToggle = document.getElementById('slider');
 const resizeToggle = document.getElementById('resize-toggle');
 const removeToggle = document.getElementById('remove-toggle');
 const swappableToggle = document.getElementById('swappable-toggle');
+const saveStatus = document.getElementById('save-status');
+const loadStatus = document.getElementById('load-status');
+
 document.addEventListener("DOMContentLoaded", function() {
     const copyBtn = document.getElementById("copyNpmInstall");
     copyBtn.addEventListener("click", function() {
@@ -958,15 +1087,17 @@ document.addEventListener("DOMContentLoaded", function() {
         navigator.clipboard.writeText(linkText)
             .then(() => {
                 console.log("Copiado al portapapeles:", linkText);
-                // Puedes poner feedback visual aquí
+                showAlert("Enlace copiado al portapapeles", "success");
                 copyBtn.title = "¡Copiado!";
                 setTimeout(() => copyBtn.title = "Copy", 1500);
             })
             .catch(err => {
                 console.error("Error al copiar:", err);
+                showAlert("Error al copiar el enlace", "error");
             });
     });
 });
+
 const grid = new DragGrid('#grid', {
     columns: 12,
     rowHeight: 60,
@@ -977,6 +1108,7 @@ const grid = new DragGrid('#grid', {
     animate: true,
     swappable: true
 });
+
 function setContent(badges, text) {
     let html = '<div class="px-2">';
     badges.forEach((badge) => {
@@ -1114,70 +1246,95 @@ const initialWidgets = [
 ];
 
         
-        initialWidgets.forEach((element)=>{
-            grid.addWidget({
-                id: element.id,
-                x: element.x,
-                y: element.y,
-                width: element.width,
-                height: element.height,
-                title: element.title,
-                content: element.content
-            });
-        });
+initialWidgets.forEach((element)=>{
+    grid.addWidget({
+        id: element.id,
+        x: element.x,
+        y: element.y,
+        width: element.width,
+        height: element.height,
+        title: element.title,
+        content: element.content
+    });
+});
 
-        clearGridBtn.addEventListener('click', () => {
-            if (confirm('¿Estás seguro de que quieres limpiar la cuadrícula?')) {
-                grid.clear();
-            }
-        });
-        
+clearGridBtn.addEventListener('click', () => {
+    showConfirmation('¿Estás seguro de que quieres limpiar la cuadrícula?', () => {
+        grid.clear();
+        showAlert('Cuadrícula limpiada correctamente', 'success');
+    });
+});
 
-
-        createWidgetBtn.addEventListener('click', () => {
-            const emptySpace = grid.findEmptySpace(3, 2);
-            const width = parseInt(document.getElementById('widget-width').value);
-            const height = parseInt(document.getElementById('widget-height').value);
-            const title = document.getElementById('widget-title').value;
-            const content = document.getElementById('widget-content').value;
-            
-            // Crear el widget
-            grid.addWidget({
-                x: emptySpace.x,
-                y: emptySpace.y,
-                width: width,
-                height: height,
-                content: `
-                <div class="widget-content">
-                    ${content}
-                </div>
-                `,
-                id: `widget-${Date.now()}`,
-                title: title
-            });
-            
-        });
+createWidgetBtn.addEventListener('click', () => {
+    const emptySpace = grid.findEmptySpace(3, 2);
+    const width = parseInt(document.getElementById('widget-width').value);
+    const height = parseInt(document.getElementById('widget-height').value);
+    const title = document.getElementById('widget-title').value;
+    const content = document.getElementById('widget-content').value;
     
-        dragToggle.addEventListener('change', (e) => {
-            const isEnabled = e.target.value === 'true';
-            grid.enableDragging(isEnabled);      
-        });
+    // Crear el widget
+    grid.addWidget({
+        x: emptySpace.x,
+        y: emptySpace.y,
+        width: width,
+        height: height,
+        content: `
+        <div class="widget-content">
+            ${content}
+        </div>
+        `,
+        id: `widget-${Date.now()}`,
+        title: title
+    });
+    
+    showAlert('Widget creado correctamente', 'success');
+});
 
-        resizeToggle.addEventListener('change', (e) => {
-            const isEnabled = e.target.value === 'true';
-            grid.enableResizing(isEnabled);
-        });
+dragToggle.addEventListener('change', (e) => {
+    const isEnabled = e.target.value === 'true';
+    grid.enableDragging(isEnabled);
+    showAlert(`Arrastrar ${isEnabled ? 'activado' : 'desactivado'}`, 'info');
+});
 
+resizeToggle.addEventListener('change', (e) => {
+    const isEnabled = e.target.value === 'true';
+    grid.enableResizing(isEnabled);
+    showAlert(`Redimensionar ${isEnabled ? 'activado' : 'desactivado'}`, 'info');
+});
 
-        removeToggle.addEventListener('change', (e) => {
-            const isEnabled = e.target.value === 'true';
-            grid.enableRemoving(isEnabled);
-        });
+removeToggle.addEventListener('change', (e) => {
+    const isEnabled = e.target.value === 'true';
+    grid.enableRemoving(isEnabled);
+    showAlert(`Eliminar ${isEnabled ? 'activado' : 'desactivado'}`, 'info');
+});
 
-        swappableToggle.addEventListener('change', (e) => {
-            const isEnabled = e.target.value === 'true';
-            grid.enableSwap(isEnabled);
-        });
+swappableToggle.addEventListener('change', (e) => {
+    const isEnabled = e.target.value === 'true';
+    grid.enableSwap(isEnabled);
+    showAlert(`Intercambiar ${isEnabled ? 'activado' : 'desactivado'}`, 'info');
+});
+
+saveStatus.addEventListener('click', () => {
+    const success = grid.saveToLocalStorage();
+    if (!success) {
+        showAlert('Error: no se pudo guardar en el almacenamiento local. Verifica el espacio disponible o los permisos del navegador.', 'error');
+    } else {
+        showAlert('Configuración guardada correctamente', 'success');
+    }
+});
+
+loadStatus.addEventListener('click', () => {
+    try {
+        const savedData = JSON.parse(localStorage.getItem('gridConfig'));
+        if (savedData) {
+            grid.load(savedData);
+            showAlert('Configuración cargada correctamente', 'success');
+        } else {
+            showAlert('No se encontró ninguna configuración guardada', 'warning');
+        }
+    } catch (error) {
+        showAlert('Error al cargar la configuración', 'error');
+    }});
      </script>
 </body>
 </html>
