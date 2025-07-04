@@ -103,7 +103,7 @@ class DragGrid {
           border: 1pxrgb(48, 64, 77);
           border-radius: 5px;
           position: absolute;
-          z-index: 99;
+          z-index: 9;
           transition: all 0.1s ease;
         }
         .drag-grid-drag-handle {
