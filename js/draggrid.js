@@ -16,6 +16,7 @@ class DragGrid {
       saveMethod: 'POST',
       swappable: false,
       compact: true, 
+      localStorageKey: 'gridConfig',
     }, options);
 
     this.items = [];
@@ -34,6 +35,7 @@ class DragGrid {
     this.onChangeCallback = null;
     this.swapTargetWidget = null; 
     this._canStartDrag = this.options.draggable;
+    this.localStorageKey = this.options.localStorageKey;
   
     this._handleDragMove = this._handleDragMove.bind(this);
     this._handleDragEnd = this._handleDragEnd.bind(this);
@@ -886,7 +888,16 @@ class DragGrid {
       }
     }
   }
-
+  saveToLocalStorage(data = null) {
+    const dataToSend = data || this.serialize();
+    try {
+      localStorage.setItem(this.options.localStorageKey || 'gridConfig', JSON.stringify(dataToSend));
+      return true;
+    } catch (error) {
+      console.error('Error al guardar en localStorage:', error);
+      return false;
+    }
+  }
   saveToServer(data = null) {
     const dataToSend = data || this.serialize();
     
