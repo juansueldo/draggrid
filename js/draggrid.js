@@ -93,8 +93,8 @@ class DragGrid {
           position: absolute;
           right: 3px;
           bottom: 8px;
-          width: 16px;
-          height: 16px;
+          width: 24px;
+          height: 24px;
           cursor: se-resize;
           border-radius: 2px;
         }
