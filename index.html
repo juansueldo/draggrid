@@ -793,6 +793,7 @@
 </html>
 -->
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -859,6 +860,10 @@
         transform: translateX(100%);
         opacity: 0;
     }
+    .bg-custom-dark {
+      background-color: #030712;
+    }
+
 
 </style>
 <body>
@@ -921,8 +926,8 @@
     <div class="px-4">
         <div id="grid" class="grid-container"></div>
     </div>
-    <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg max-w-md w-full" style="background-color: rgb(3, 7, 18, 1) !important;">
+    <div id="modal" class="fixed inset-0 bg-custom-dark bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg max-w-md w-full" style="background-color: rgba(23, 32, 57, 0.27) !important;">
             <h2 class="text-lg font-semibold mb-4 text-gray-800 dark:text-white">Add Widget</h2>
 
             <div class="modal-body space-y-4">
@@ -930,25 +935,25 @@
                 <div class="form-group">
                     <label for="widget-width" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Width:</label>
                     <input type="number" id="widget-width" min="1" max="12" value="3"
-                    class="mt-1 w-full rounded-md border-gray-300 border border-gray-200 bg-gray-50 p-2 dark:bg-gray-800 dark:text-white shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 dark:focus:ring-blue-400 focus:outline-none" />
+                    class="mt-1 w-full rounded-md border-gray-300 border border-gray-200 bg-gray-50 p-2 text-xs placeholder-opacity-80 dark:border-gray-700 dark:bg-gray-900 dark:text-white shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 dark:focus:ring-blue-400 focus:outline-none" />
                 </div>
 
                 <div class="form-group">
                     <label for="widget-height" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Height:</label>
                     <input type="number" id="widget-height" min="1" max="10" value="2"
-                    class="mt-1 w-full rounded-md border-gray-300 border border-gray-200 bg-gray-50 p-2 dark:bg-gray-800 dark:text-white shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 dark:focus:ring-blue-400 focus:outline-none" />
+                    class="mt-1 w-full rounded-md border-gray-300 border border-gray-200 bg-gray-50 p-2 text-xs placeholder-opacity-80 dark:border-gray-700 dark:bg-gray-900 dark:text-white shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 dark:focus:ring-blue-400 focus:outline-none" />
                 </div>
 
                 <div class="form-group">
                     <label for="widget-title" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Title:</label>
                     <input type="text" id="widget-title" value="Nuevo Widget"
-                    class="mt-1 w-full rounded-md border-gray-300 border border-gray-200 bg-gray-50 p-2 dark:bg-gray-800 dark:text-white shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 dark:focus:ring-blue-400 focus:outline-none" />
+                    class="mt-1 w-full rounded-md border-gray-300 border border-gray-200 bg-gray-50 p-2 text-xs placeholder-opacity-80 dark:border-gray-700 dark:bg-gray-900 dark:text-white shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 dark:focus:ring-blue-400 focus:outline-none" />
                 </div>
 
                 <div class="form-group">
                     <label for="widget-content" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Content:</label>
                     <textarea id="widget-content" rows="4"
-                    class="mt-1 w-full rounded-md border-gray-300 p-2 border border-gray-200 bg-gray-50 dark:bg-gray-800 dark:text-white shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 dark:focus:ring-blue-400 focus:outline-none"></textarea>
+                    class="mt-1 w-full rounded-md border border-gray-200 bg-gray-50 p-2 text-xs placeholder-opacity-80 dark:border-gray-700 dark:bg-gray-900 dark:text-white shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 dark:focus:ring-blue-400 focus:outline-none"></textarea>
                 </div>
             </div>
             
@@ -1003,15 +1008,15 @@ function showAlert(message, type = 'info', duration = 4000) {
     
     const alertElement = document.createElement('div');
     alertElement.id = alertId;
-    alertElement.className = `alert p-4 text-sm rounded-lg shadow-lg ${typeClasses[type]} border border-opacity-20`;
+    alertElement.className = `alert bg-custom-dark p-4 text-sm rounded-lg shadow-lg ${typeClasses[type]} border border-opacity-20`;
     alertElement.innerHTML = `
         <div class="flex items-center">
             <div class="flex-shrink-0 mr-3">
                 ${typeIcons[type]}
             </div>
-            <div class="flex-1">
+            <div class="flex-1 flex flex-col">
                 <span class="font-medium">${type.charAt(0).toUpperCase() + type.slice(1)}!</span>
-                <span class="ml-2">${message}</span>
+                <span class="">${message}</span>
             </div>
             <button class="ml-4 text-current opacity-50 hover:opacity-100 transition-opacity" onclick="hideAlert('${alertId}')">
                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -1087,13 +1092,13 @@ document.addEventListener("DOMContentLoaded", function() {
         navigator.clipboard.writeText(linkText)
             .then(() => {
                 console.log("Copiado al portapapeles:", linkText);
-                showAlert("Enlace copiado al portapapeles", "success");
+                showAlert("Link copied to clipboard", "success");
                 copyBtn.title = "¡Copiado!";
                 setTimeout(() => copyBtn.title = "Copy", 1500);
             })
             .catch(err => {
                 console.error("Error al copiar:", err);
-                showAlert("Error al copiar el enlace", "error");
+                showAlert("Error copying link", "error");
             });
     });
 });
@@ -1259,9 +1264,9 @@ initialWidgets.forEach((element)=>{
 });
 
 clearGridBtn.addEventListener('click', () => {
-    showConfirmation('¿Estás seguro de que quieres limpiar la cuadrícula?', () => {
+    showConfirmation('Are you sure you want to clear the grid?', () => {
         grid.clear();
-        showAlert('Cuadrícula limpiada correctamente', 'success');
+        showAlert('Grid cleaned successfully', 'success');
     });
 });
 
@@ -1287,39 +1292,39 @@ createWidgetBtn.addEventListener('click', () => {
         title: title
     });
     
-    showAlert('Widget creado correctamente', 'success');
+    showAlert('Widget created successfully', 'success');
 });
 
 dragToggle.addEventListener('change', (e) => {
     const isEnabled = e.target.value === 'true';
     grid.enableDragging(isEnabled);
-    showAlert(`Arrastrar ${isEnabled ? 'activado' : 'desactivado'}`, 'info');
+    showAlert(`Drag ${isEnabled ? 'enabled' : 'disabled'}`, 'info');
 });
 
 resizeToggle.addEventListener('change', (e) => {
     const isEnabled = e.target.value === 'true';
     grid.enableResizing(isEnabled);
-    showAlert(`Redimensionar ${isEnabled ? 'activado' : 'desactivado'}`, 'info');
+    showAlert(`Resize ${isEnabled ? 'enabled' : 'disabled'}`, 'info');
 });
 
 removeToggle.addEventListener('change', (e) => {
     const isEnabled = e.target.value === 'true';
     grid.enableRemoving(isEnabled);
-    showAlert(`Eliminar ${isEnabled ? 'activado' : 'desactivado'}`, 'info');
+    showAlert(`Remove ${isEnabled ? 'enabled' : 'disabled'}`, 'info');
 });
 
 swappableToggle.addEventListener('change', (e) => {
     const isEnabled = e.target.value === 'true';
     grid.enableSwap(isEnabled);
-    showAlert(`Intercambiar ${isEnabled ? 'activado' : 'desactivado'}`, 'info');
+    showAlert(`Swap ${isEnabled ? 'enabled' : 'disabled'}`, 'info');
 });
 
 saveStatus.addEventListener('click', () => {
     const success = grid.saveToLocalStorage();
     if (!success) {
-        showAlert('Error: no se pudo guardar en el almacenamiento local. Verifica el espacio disponible o los permisos del navegador.', 'error');
+        showAlert('Error: Could not save to local storage. Check available space or browser permissions.', 'error');
     } else {
-        showAlert('Configuración guardada correctamente', 'success');
+        showAlert('Settings saved successfully.', 'success');
     }
 });
 
@@ -1328,12 +1333,12 @@ loadStatus.addEventListener('click', () => {
         const savedData = JSON.parse(localStorage.getItem('gridConfig'));
         if (savedData) {
             grid.load(savedData);
-            showAlert('Configuración cargada correctamente', 'success');
+            showAlert('Configuration loaded successfully.', 'success');
         } else {
-            showAlert('No se encontró ninguna configuración guardada', 'warning');
+            showAlert('No saved configuration found.', 'warning');
         }
     } catch (error) {
-        showAlert('Error al cargar la configuración', 'error');
+        showAlert('Error loading configuration.', 'error');
     }});
      </script>
 </body>
